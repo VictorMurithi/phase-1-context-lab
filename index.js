@@ -16,8 +16,70 @@ const allWagesFor = function () {
 
     const payable = eligibleDates.reduce(function (memo, d) {
         return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0) // <== Hm, why did we need to add bind() there? We'll discuss soon!
+    }.bind(this), 0)
 
     return payable
 }
 
+function createEmployeeRecord(firstName, familyName, title, payPerHour) {
+    return {
+      firstName: firstName,
+      familyName: familyName,
+      title: title,
+      payPerHour: payPerHour,
+      timeInEvents: [],
+      timeOutEvents: [],
+    };
+}
+function createTimeInEvent(employee, timeStamp) {
+    const [date, time] = timeStamp.split(" ");
+    
+    const timeInEvent = {
+      type: "TimeIn",
+      hour: parseInt(time.substr(0, 2)),
+      date: date,
+    };
+    
+    employee.timeInEvents.push(timeInEvent);
+    
+    return employee;
+}
+function createTimeOutEvent(employee, timeStamp) {
+    const [date, time] = timeStamp.split(" ");
+    
+    const timeOutEvent = {
+      type: "TimeOut",
+      hour: parseInt(time.substr(0, 2)),
+      date: date,
+    };
+    
+    employee.timeOutEvents.push(timeOutEvent);
+    
+    return employee;
+}
+function hoursWorkedOnDate(employee, date) {
+    const timeInEvent = employee.timeInEvents.find(event => event.date === date);
+    const timeOutEvent = employee.timeOutEvents.find(event => event.date === date);
+  
+    if (timeInEvent && timeOutEvent) {
+      const hoursWorked = (timeOutEvent.hour - timeInEvent.hour);
+      return hoursWorked;
+    }
+  
+    return 0;
+}
+function wagesEarnedOnDate(employee, date) {
+    const hoursWorked = hoursWorkedOnDate(employee, date);
+    const payRate = employee.payPerHour;
+    const wagesEarned = hoursWorked * payRate;
+    
+    return wagesEarned;
+  }
+function findEmployeeByFirstName(srcArray, firstName) {
+    return srcArray.find(employee => employee.firstName === firstName);
+}
+function calculatePayroll(employeeArray) {
+  return employeeArray.reduce((totalPayroll, employee) => {
+    return totalPayroll + allWagesFor(employee);
+  }, 0);
+}
