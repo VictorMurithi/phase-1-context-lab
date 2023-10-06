@@ -36,13 +36,10 @@ function createEmployeeRecord(array) {
     return arrayOfArrays.map(createEmployeeRecord);
   }
   function createTimeInEvent(employeeRecord, dateTime) {
-    // Validate input arguments
-    if (!employeeRecord || !dateTime || typeof dateTime !== 'string') {
-      console.error('Invalid arguments: employeeRecord or dateTime is undefined, null, or not a string.');
-      return employeeRecord;
-    }
-    const [date, time] = dateTime.split(' ');
-    const [hour, minute] = time.split(':');
+    
+    const [date, time] = dateTime.split(" ");
+    const [hour] = time.split(":");
+  
     const timeInEvent = {
       type: 'TimeIn',
       hour: parseInt(hour, 10),
@@ -51,7 +48,6 @@ function createEmployeeRecord(array) {
     employeeRecord.timeInEvents.push(timeInEvent);
     return employeeRecord;
   }
-  
 function createTimeOutEvent(employee, timeStamp) {
     const [date, time] = timeStamp.split(" ");
     
