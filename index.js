@@ -21,29 +21,37 @@ const allWagesFor = function () {
     return payable
 }
 
-function createEmployeeRecord(firstName, familyName, title, payPerHour) {
-    return {
-      firstName: firstName,
-      familyName: familyName,
-      title: title,
-      payPerHour: payPerHour,
+function createEmployeeRecord(array) {
+    const employeeRecord = {
+      firstName: array[0],
+      familyName: array[1],
+      title: array[2],
+      payPerHour: array[3],
       timeInEvents: [],
       timeOutEvents: [],
     };
-}
-function createTimeInEvent(employee, timeStamp) {
-    const [date, time] = timeStamp.split(" ");
-    
+    return employeeRecord;
+  }
+  function createEmployeeRecords(arrayOfArrays) {
+    return arrayOfArrays.map(createEmployeeRecord);
+  }
+  function createTimeInEvent(employeeRecord, dateTime) {
+    // Validate input arguments
+    if (!employeeRecord || !dateTime || typeof dateTime !== 'string') {
+      console.error('Invalid arguments: employeeRecord or dateTime is undefined, null, or not a string.');
+      return employeeRecord;
+    }
+    const [date, time] = dateTime.split(' ');
+    const [hour, minute] = time.split(':');
     const timeInEvent = {
-      type: "TimeIn",
-      hour: parseInt(time.substr(0, 2)),
+      type: 'TimeIn',
+      hour: parseInt(hour, 10),
       date: date,
     };
-    
-    employee.timeInEvents.push(timeInEvent);
-    
-    return employee;
-}
+    employeeRecord.timeInEvents.push(timeInEvent);
+    return employeeRecord;
+  }
+  
 function createTimeOutEvent(employee, timeStamp) {
     const [date, time] = timeStamp.split(" ");
     
