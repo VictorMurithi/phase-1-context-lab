@@ -9,81 +9,104 @@
  for you to use if you need it!
  */
 
-const allWagesFor = function () {
-    const eligibleDates = this.timeInEvents.map(function (e) {
-        return e.date
-    })
-
-    const payable = eligibleDates.reduce(function (memo, d) {
-        return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0)
-
-    return payable
+ function hoursWorkedBetween(timeIn, timeOut) {
+  const timeInMinutes = new Date(timeIn).getMinutes();
+  const timeOutMinutes = new Date(timeOut).getMinutes();
+  const hoursWorked = (new Date(timeOut) - new Date(timeIn)) / (1000 * 60 * 60);
+  return hoursWorked - (timeInMinutes / 60) + (timeOutMinutes / 60);
 }
 
-function createEmployeeRecord(array) {
-    const employeeRecord = {
-      firstName: array[0],
-      familyName: array[1],
-      title: array[2],
-      payPerHour: array[3],
-      timeInEvents: [],
-      timeOutEvents: [],
-    };
-    return employeeRecord;
-  }
-  function createEmployeeRecords(arrayOfArrays) {
-    return arrayOfArrays.map(createEmployeeRecord);
-  }
-  function createTimeInEvent(employeeRecord, dateTime) {
-    
-    const [date, time] = dateTime.split(" ");
-    const [hour] = time.split(":");
-  
-    const timeInEvent = {
-      type: 'TimeIn',
-      hour: parseInt(hour, 10),
-      date: date,
-    };
-    employeeRecord.timeInEvents.push(timeInEvent);
-    return employeeRecord;
-  }
-function createTimeOutEvent(employee, timeStamp) {
-    const [date, time] = timeStamp.split(" ");
-    
-    const timeOutEvent = {
-      type: "TimeOut",
-      hour: parseInt(time.substr(0, 2)),
-      date: date,
-    };
-    
-    employee.timeOutEvents.push(timeOutEvent);
-    
-    return employee;
+function createEmployeeRecord(arr) {
+  return {
+    firstName: arr[0],
+    familyName: arr[1],
+    title: arr[2],
+    payPerHour: arr[3],
+    timeInEvents: [],
+    timeOutEvents: [],
+  };
 }
-function hoursWorkedOnDate(employee, date) {
-    const timeInEvent = employee.timeInEvents.find(event => event.date === date);
-    const timeOutEvent = employee.timeOutEvents.find(event => event.date === date);
-  
-    if (timeInEvent && timeOutEvent) {
-      const hoursWorked = (timeOutEvent.hour - timeInEvent.hour);
-      return hoursWorked;
-    }
-  
-    return 0;
+
+function createEmployeeRecords(arrays) {
+  return arrays.map(arr => createEmployeeRecord(arr));
 }
-function wagesEarnedOnDate(employee, date) {
-    const hoursWorked = hoursWorkedOnDate(employee, date);
-    const payRate = employee.payPerHour;
-    const wagesEarned = hoursWorked * payRate;
-    
-    return wagesEarned;
-  }
-function findEmployeeByFirstName(srcArray, firstName) {
-    return srcArray.find(employee => employee.firstName === firstName);
+
+function createTimeInEvent(dateStamp) {
+  const [date, hour] = dateStamp.split(' ');
+  this.timeInEvents.push({
+    type: "TimeIn",
+    date: date,
+    hour: parseInt(hour),
+  });
+  return this;
 }
-function calculatePayroll(employeeArray) {
-  return employeeArray.reduce((totalPayroll, employee) => {
-    return totalPayroll + allWagesFor(employee);
+
+function createTimeOutEvent(dateStamp) {
+  const [date, hour] = dateStamp.split(' ');
+  this.timeOutEvents.push({
+    type: "TimeOut",
+    date: date,
+    hour: parseInt(hour),
+  });
+  return this;
+}
+
+function hoursWorkedOnDate(date) {
+  const timeInEvent = this.timeInEvents.find(event => event.date === date);
+  const timeOutEvent = this.timeOutEvents.find(event => event.date === date);
+  return hoursWorkedBetween(timeInEvent.hour, timeOutEvent.hour);
+}
+
+function wagesEarnedOnDate(date) {
+  const hoursWorked = hoursWorkedOnDate.call(this, date);
+  return hoursWorked * this.payPerHour;
+}
+
+function allWagesFor() {
+  const datesWorked = this.timeInEvents.map(event => event.date);
+  return datesWorked.reduce((totalWages, date) => {
+    return totalWages + wagesEarnedOnDate.call(this, date);
   }, 0);
 }
+
+// Replace calculatePayroll with your implementation
+function calculatePayroll(employeeRecords) {
+  return employeeRecords.reduce((totalPayroll, employee) => {
+    return totalPayroll + allWagesFor.call(employee);
+  }, 0);
+}
+function hoursWorkedOnDate(date) {
+  const timeInEvent = this.timeInEvents.find(event => event.date === date);
+  const timeOutEvent = this.timeOutEvents.find(event => event.date === date);
+
+  const hoursWorked = (timeOutEvent.hour - timeInEvent.hour) / 100;
+  return hoursWorked;
+}
+
+function wagesEarnedOnDate(date) {
+  const hoursWorked = hoursWorkedOnDate.call(this, date);
+  return hoursWorked * this.payPerHour;
+}
+
+function allWagesFor() {
+  const datesWorked = this.timeInEvents.map(event => event.date);
+  return datesWorked.reduce((totalWages, date) => {
+    return totalWages + wagesEarnedOnDate.call(this, date);
+  }, 0);
+}
+function findEmployeeByFirstName(collection, firstNameString) {
+  return collection.find(employee => employee.firstName === firstNameString);
+}
+
+
+// Export the necessary functions if needed.
+module.exports = {
+  createEmployeeRecord,
+  createEmployeeRecords,
+  createTimeInEvent,
+  createTimeOutEvent,
+  hoursWorkedOnDate,
+  wagesEarnedOnDate,
+  allWagesFor,
+  calculatePayroll,
+};
